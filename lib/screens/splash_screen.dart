@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+// We can keep the flutter_svg import in case it's used elsewhere
 import '../view_models/user_view_model.dart';
 import '../widgets/pmi_header_logo.dart';
 import 'login_screen.dart';
@@ -71,13 +72,15 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 ScaleTransition(
                   scale: _animation,
                   child: Image.asset(
-                    'assets/images/pmi_logo.png',
-                    height: 150,
+                    'assets/images/kenya_map.png',
+                    height: 280,
+                    width: 280,
+                    fit: BoxFit.contain,
                     errorBuilder: (context, error, stackTrace) => 
-                      const Icon(Icons.eco, size: 100, color: Colors.white),
+                      const Icon(Icons.map, size: 100, color: Colors.white),
                   ),
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 8), // Reduced from 16 to match image
                 FadeTransition(
                   opacity: _animation,
                   child: const Text(
@@ -89,7 +92,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 4), // Reduced from 16 to match image
                 FadeTransition(
                   opacity: _animation,
                   child: const Text(
@@ -101,7 +104,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     ),
                   ),
                 ),
-                const SizedBox(height: 64),
+                const SizedBox(height: 40), // Reduced from 64 to match image
                 const CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 ),
