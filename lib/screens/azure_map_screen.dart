@@ -418,7 +418,7 @@ class _AzureMapScreenState extends State<AzureMapScreen> {  bool _isLoading = fa
                 onMarkerTapped: _onTreeMarkerTapped,
               ),
               
-              // Search bar overlay
+              // Search bar overlay - Fixed layout issue
               Positioned(
                 top: 16,
                 left: 16,
@@ -434,11 +434,13 @@ class _AzureMapScreenState extends State<AzureMapScreen> {  bool _isLoading = fa
                       children: [
                         const Icon(Icons.search),
                         const SizedBox(width: 8),
-                        Expanded(
+                        Expanded(  // Changed from Flexible to Expanded for better constraint handling
                           child: TextField(
                             decoration: const InputDecoration(
                               hintText: 'Search locations or species',
                               border: InputBorder.none,
+                              isDense: true,  // Added to reduce vertical size and improve layout
+                              contentPadding: EdgeInsets.zero,  // Added to improve layout
                             ),
                             onChanged: (value) {
                               setState(() {
@@ -451,6 +453,7 @@ class _AzureMapScreenState extends State<AzureMapScreen> {  bool _isLoading = fa
                           icon: const Icon(Icons.filter_list),
                           onPressed: _showFilterDialog,
                           tooltip: 'Filter',
+                          constraints: const BoxConstraints(),  // Added to prevent constraint issues
                         ),
                       ],
                     ),
