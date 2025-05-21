@@ -22,29 +22,30 @@ class PMIAppDrawer extends StatelessWidget {
           
           return ListView(
             padding: EdgeInsets.zero,
-            children: [
-              DrawerHeader(
+            children: [              Container(
+                padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.primary,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     CircleAvatar(
-                      radius: 32,
+                      radius: 30,
                       backgroundColor: Colors.white.withOpacity(0.2),
                       child: Icon(
                         Icons.person,
-                        size: 40,
+                        size: 36,
                         color: Colors.white,
                       ),
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 8),
                     Text(
                       user.name,
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 18,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -52,8 +53,9 @@ class PMIAppDrawer extends StatelessWidget {
                       user.email,
                       style: const TextStyle(
                         color: Colors.white70,
-                        fontSize: 14,
+                        fontSize: 13,
                       ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
                     Container(
