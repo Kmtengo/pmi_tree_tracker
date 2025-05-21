@@ -22,15 +22,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
       Provider.of<TreeViewModel>(context, listen: false).loadTrees();
       Provider.of<ProjectViewModel>(context, listen: false).loadProjects();
     });
-  }
-  @override
+  }  @override
   Widget build(BuildContext context) {    return LeafPatternBackground(
       isFormPage: false,
       child: Scaffold(
-        backgroundColor: Colors.transparent,        appBar: AppBar(
-          title: const Text('Dashboard'),
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          foregroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          toolbarHeight: 0,
         ),
         body: Consumer<TreeViewModel>(
           builder: (context, treeViewModel, child) {

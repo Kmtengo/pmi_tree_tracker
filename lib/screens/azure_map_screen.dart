@@ -317,13 +317,13 @@ class _AzureMapScreenState extends State<AzureMapScreen> {  bool _isLoading = fa
       },
     );
   }
-
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(      appBar: AppBar(
-        title: const Text('Tree Map'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Colors.white,
+  Widget build(BuildContext context) {    
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        toolbarHeight: 0,
       ),
       body: Consumer<TreeViewModel>(
         builder: (context, treeViewModel, child) {

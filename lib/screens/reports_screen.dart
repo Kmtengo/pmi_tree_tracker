@@ -60,13 +60,13 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
         _endDate = picked.end;
       });
     }
-  }
-  @override
+  }  @override
   Widget build(BuildContext context) {
-    return Scaffold(      appBar: AppBar(
-        title: const Text('Reports'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Colors.white,
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        toolbarHeight: 0,
       ),
       body: Consumer<TreeViewModel>(
         builder: (context, treeViewModel, child) {
@@ -538,11 +538,10 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
       final team = tree.teamName ?? 'Unassigned';
       teamMap[team] = (teamMap[team] ?? 0) + tree.quantity;
     }
-    
-    final teamList = teamMap.entries.toList()
+      final teamList = teamMap.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
     
-    final totalTrees = trees.fold(0, (sum, tree) => sum + tree.quantity);
+    // We only need maxValue for calculating percentage, totalTrees not used here
     final maxValue = teamList.isNotEmpty ? teamList.first.value : 0;
     
     return SingleChildScrollView(
