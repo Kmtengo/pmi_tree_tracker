@@ -1,0 +1,67 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'view_models/tree_view_model.dart';
+import 'view_models/project_view_model.dart';
+import 'view_models/user_view_model.dart';
+import 'screens/splash_screen.dart';
+
+void main() async {
+  // Ensure Flutter is initialized
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize user view model to check if user is logged in
+  final userViewModel = UserViewModel();
+  await userViewModel.initialize();
+  
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => userViewModel),
+        ChangeNotifierProvider(create: (_) => TreeViewModel()),
+        ChangeNotifierProvider(create: (_) => ProjectViewModel()),
+      ],
+      child: const MyApp(),
+    ),
+  );
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'PMI Tree Tracker',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF2E7D32), // Forest Green as primary
+          primary: const Color(0xFF2E7D32),
+          secondary: const Color(0xFFF15A29), // Orange-Red
+          tertiary: const Color(0xFF00AEEF), // Sky Blue
+        ),
+        useMaterial3: true,
+        fontFamily: 'Segoe UI', // Sans-serif clean font
+        textTheme: const TextTheme(
+          headlineLarge: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF333333)), // Charcoal
+          headlineMedium: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF333333)),
+          titleLarge: TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF333333)),
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF2E7D32),
+          foregroundColor: Colors.white,
+          elevation: 0,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF2E7D32),
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+          ),
+        ),
+      ),
+      home: const SplashScreen(),
+    );
+  }
+}

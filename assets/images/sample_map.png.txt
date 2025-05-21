@@ -1,0 +1,2 @@
+// This is a placeholder file. Replace with actual image.
+// Create a PNG file here with a sample map.
