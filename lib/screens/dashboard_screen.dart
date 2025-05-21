@@ -1,379 +1,399 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../view_models/tree_view_model.dart';
-import '../view_models/project_view_model.dart';
-import '../models/tree_models.dart';
-import '../widgets/leaf_pattern_background.dart';
+import '../view_models/user_view_model.dart';
 import '../widgets/pmi_button_styles.dart';
 
-class DashboardScreen extends StatefulWidget {
+class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
   @override
-  State<DashboardScreen> createState() => _DashboardScreenState();
-}
-
-class _DashboardScreenState extends State<DashboardScreen> {
-  @override
-  void initState() {
-    super.initState();
-    // Load data when dashboard is opened
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<TreeViewModel>(context, listen: false).loadTrees();
-      Provider.of<ProjectViewModel>(context, listen: false).loadProjects();
-    });
-  }  @override
-  Widget build(BuildContext context) {    return LeafPatternBackground(
-      isFormPage: false,
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          toolbarHeight: 0,
-        ),
-        body: Consumer<TreeViewModel>(
-          builder: (context, treeViewModel, child) {
-            if (treeViewModel.isLoading) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            
-            if (treeViewModel.error != null) {
-              return Center(
-                child: Text(
-                  'Error loading data: ${treeViewModel.error}',
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
-                ),
-              );
-            }
-
-            // Calculate statistics
-            int treesPlanted = treeViewModel.trees.fold(0, (sum, tree) => sum + tree.quantity);
-            int projects = 3; // Mock data for now
-            double hectaresRestored = treesPlanted / 400; // Rough estimate
-
-            return RefreshIndicator(
-              onRefresh: () => treeViewModel.loadTrees(),
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF7F9F7),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Status cards section
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                child: SizedBox(
+                  height: 180, // Increased to 180px
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     children: [
-                      _buildStatisticsSection(
-                        context: context,
-                        treesPlanted: treesPlanted,
-                        projects: projects,
-                        hectaresRestored: hectaresRestored,
+                      StatusCard(
+                        backgroundColor: const Color(0xFF345A33),
+                        iconData: Icons.local_florist,
+                        title: 'Trees planted (total)',
+                        subtitle: 'Grows paradise\nA plantita y planter',
+                        buttonText: 'Add new planting',
+                        buttonColor: Colors.lightGreen[100]!,
+                        onButtonPressed: () {
+                          // Navigate to planting screen
+                        },
+                        onCardTap: () {
+                          // Show tree details
+                        },
                       ),
-                      const SizedBox(height: 24),
-                      _buildRecentActivitySection(
-                        context: context,
-                        trees: treeViewModel.trees,
+                      const SizedBox(width: 15),
+                      StatusCard(
+                        backgroundColor: const Color(0xFF0DD7E6),
+                        iconData: Icons.article,
+                        title: 'Active projects',
+                        subtitle: 'Stocking where\nAn earthy realm of activities',
+                        buttonText: 'Upload growth update',
+                        buttonColor: Colors.lightBlue[100]!,
+                        buttonTextStyle: const TextStyle(
+                          fontSize: 8.5, // Reduced by 0.5px from 9.0
+                          fontWeight: FontWeight.w600,
+                        ),
+                        onButtonPressed: () {
+                          // Navigate to upload screen
+                        },
+                        onCardTap: () {
+                          // Show projects
+                        },
                       ),
-                      const SizedBox(height: 24),
-                      _buildProjectsSection(context),
+                      const SizedBox(width: 15),
+                      StatusCard(
+                        backgroundColor: const Color(0xFFF58804),
+                        iconData: Icons.verified_user,
+                        title: 'Pending verifications',
+                        subtitle: 'Seeds planted\nA promise fulfilled',
+                        buttonText: 'View updates',
+                        buttonColor: const Color(0xFFFDCFBC), // Light peach
+                        onButtonPressed: () {
+                          // Navigate to verification screen
+                        },
+                        onCardTap: () {
+                          // Show pending verifications
+                        },
+                      ),
                     ],
                   ),
                 ),
               ),
-            );
-          },
-        ),
-      ),
-    );
-  }
 
-  Widget _buildStatisticsSection({
-    required BuildContext context,
-    required int treesPlanted,
-    required int projects,
-    required double hectaresRestored,
-  }) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Impact Summary',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+              // Activity feed header
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 12.0),
+                child: SectionHeader(
+                  title: 'Activity Updates!',
+                  onMorePressed: () {
+                    // Show more activities
+                  },
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildStatCard(
-                  context: context,
-                  icon: Icons.eco,
-                  value: '$treesPlanted',
-                  label: 'Trees\nPlanted',
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                _buildStatCard(
-                  context: context,
-                  icon: Icons.forest,
-                  value: hectaresRestored.toStringAsFixed(1),
-                  label: 'Hectares\nRestored',
-                  color: Theme.of(context).colorScheme.secondary,
-                ),
-                _buildStatCard(
-                  context: context,
-                  icon: Icons.group_work,
-                  value: '$projects',
-                  label: 'Active\nProjects',
-                  color: Theme.of(context).colorScheme.tertiary,
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
-  Widget _buildStatCard({
-    required BuildContext context,
-    required IconData icon,
-    required String value,
-    required String label,
-    required Color color,
-  }) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon, color: color, size: 28),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Text(
-          label,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 12,
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildRecentActivitySection({
-    required BuildContext context,
-    required List<Tree> trees,
-  }) {
-    final List<Tree> recentTrees = trees.length > 5
-        ? trees.sublist(0, 5)
-        : trees;
-
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Recent Activity',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Icon(Icons.arrow_forward),
-              ],
-            ),
-            const SizedBox(height: 16),
-            if (recentTrees.isEmpty)
-              const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text(
-                    'No recent tree planting activity',
-                    style: TextStyle(
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                ),
-              )
-            else
-              ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: recentTrees.length,
-                separatorBuilder: (context, index) => const Divider(),
-                itemBuilder: (context, index) {
-                  final tree = recentTrees[index];
-                  return ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: CircleAvatar(
-                      backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
-                      child: Icon(
-                        Icons.eco,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-                    title: Text(
-                      '${tree.quantity} ${tree.species} trees planted',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text(
-                      '${tree.location} • ${_formatDate(tree.plantingDate)}',
-                    ),
-                    trailing: Icon(
-                      Icons.chevron_right,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    onTap: () {
-                      // Navigate to tree details
-                    },
-                  );
-                },
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-  Widget _buildProjectsSection(BuildContext context) {
-    return Consumer<ProjectViewModel>(
-      builder: (context, projectViewModel, child) {
-        if (projectViewModel.isLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        
-        if (projectViewModel.projects.isEmpty) {
-          return const Card(
-            elevation: 4,
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Center(
-                child: Text('No active projects found'),
-              ),
-            ),
-          );
-        }
-        
-        final displayProjects = projectViewModel.projects.map((project) {
-          // Calculate progress percentage
-          double progress = project.targetTrees > 0 
-              ? project.plantedTrees / project.targetTrees 
-              : 0.0;
-          
-          // Limit to 100%
-          progress = progress > 1.0 ? 1.0 : progress;
-          
-          // Assign colors based on index
-          Color color;
-          int index = projectViewModel.projects.indexOf(project) % 3;
-          switch (index) {
-            case 0:
-              color = Theme.of(context).colorScheme.primary;
-              break;
-            case 1:
-              color = Theme.of(context).colorScheme.secondary;
-              break;
-            default:
-              color = Theme.of(context).colorScheme.tertiary;
-          }
-          
-          return {
-            'name': project.title,
-            'progress': progress,
-            'color': color,
-            'project': project,
-          };
-        }).toList();
-
-        return Card(
-          elevation: 4,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              // Activity feed items
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Column(
                   children: [
-                    Text(
-                      'Ongoing Projects',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    ActivityItem(
+                      title: 'You logged 12 trees in Kisumu',
+                      subtitle: '5 requests in time 00:12',
+                      iconData: Icons.forest,
+                      isFavorite: false,
+                      onFavoritePressed: () {
+                        // Toggle favorite status
+                      },
                     ),
-                    Icon(Icons.arrow_forward),
+                    const SizedBox(height: 9), // Reduced from 18
+                    ActivityItem(
+                      title: 'Upload voveh atees poow approval',
+                      subtitle: 'Mating art A4',
+                      iconData: Icons.forest,
+                      isFavorite: false,
+                      onFavoritePressed: () {
+                        // Toggle favorite status
+                      },
+                    ),
+                    const SizedBox(height: 9), // Reduced from 18
+                    ActivityItem(
+                      title: '3 photos pending approval',
+                      subtitle: 'Manes and puds /12274',
+                      iconData: Icons.forest,
+                      isFavorite: false,
+                      onFavoritePressed: () {
+                        // Toggle favorite status
+                      },
+                    ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                ...displayProjects.map((project) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                project['name'] as String,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                            Text(
-                              '${((project['progress'] as double) * 100).toInt()}%',
-                              style: TextStyle(
-                                color: (project['color'] as Color),
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        LinearProgressIndicator(
-                          value: project['progress'] as double,
-                          backgroundColor: (project['color'] as Color).withOpacity(0.1),
-                          valueColor: AlwaysStoppedAnimation<Color>(project['color'] as Color),
-                          borderRadius: BorderRadius.circular(4),
-                          minHeight: 8,
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
-              ],
-            ),
+              ),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
+}
 
-  String _formatDate(DateTime date) => '${date.day}/${date.month}/${date.year}';
+class StatusCard extends StatelessWidget {
+  final Color backgroundColor;
+  final IconData iconData;
+  final String title;
+  final String subtitle;
+  final String buttonText;
+  final Color buttonColor;
+  final TextStyle? buttonTextStyle;
+  final VoidCallback onButtonPressed;
+  final VoidCallback onCardTap;
+
+  const StatusCard({
+    super.key,
+    required this.backgroundColor,
+    required this.iconData,
+    required this.title,
+    required this.subtitle,
+    required this.buttonText,
+    required this.buttonColor,
+    this.buttonTextStyle,
+    required this.onButtonPressed,
+    required this.onCardTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Recalculate card width to ensure all 3 cards fit on screen
+    final screenWidth = MediaQuery.of(context).size.width;
+    final horizontalPadding = 32.0; // 12.0 on each side
+    final cardSpacing = 24.0; // 9.0 between each of the 3 cards (2 spaces)
+    final availableWidth = screenWidth - horizontalPadding - cardSpacing;
+    final cardWidth = availableWidth / 3; // Divide available space equally among 3 cards
+    
+    return GestureDetector(
+      onTap: onCardTap,
+      child: Container(
+        width: cardWidth,
+        height: 180,
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Top section with icon and title
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      iconData,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                  const Icon(
+                    Icons.chevron_left,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ],
+              ),
+              
+              const SizedBox(height: 4),
+              
+              // Title
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w500, // Reduced by 25% from bold (w700) to medium (w500)
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              
+              // Subtitle
+              Text(
+                subtitle,
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.7),
+                  fontSize: 11,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              
+              const Spacer(),
+              
+              // Action button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: onButtonPressed,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: buttonColor,
+                    foregroundColor: backgroundColor,
+                    padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 3),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    textStyle: buttonTextStyle ?? const TextStyle(
+                      fontSize: 9.2, // Reduced by 1px from 10.2
+                      fontWeight: FontWeight.w600,
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Text(buttonText),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class SectionHeader extends StatelessWidget {
+  final String title;
+  final VoidCallback onMorePressed;
+
+  const SectionHeader({
+    super.key,
+    required this.title,
+    required this.onMorePressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              color: Color(0xFF2D6D4B),
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          IconButton(
+            icon: const Icon(
+              Icons.keyboard_arrow_right,
+              color: Color(0xFF2D6D4B),
+            ),
+            onPressed: onMorePressed,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ActivityItem extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData iconData;
+  final VoidCallback onFavoritePressed;
+  final bool isFavorite;
+
+  const ActivityItem({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    required this.iconData,
+    required this.onFavoritePressed,
+    required this.isFavorite,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(9), // Reduced from 18
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 1.5, // Reduced from 3
+            offset: const Offset(0, 0.75), // Reduced from (0, 1.5)
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9), // Reduced from 24/18
+        child: Row(
+          children: [
+            // Leading icon
+            Container(
+              width: 27, // Reduced from 54
+              height: 27, // Reduced from 54
+              decoration: BoxDecoration(
+                color: const Color(0xFFE8F5E9),
+                borderRadius: BorderRadius.circular(6), // Reduced from 12
+              ),
+              child: Icon(
+                iconData,
+                color: const Color(0xFF063B04),
+                size: 15, // Reduced from 30
+              ),
+            ),
+            
+            const SizedBox(width: 12), // Reduced from 24
+            
+            // Title and subtitle
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 12, // Reduced from 24
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 10, // Reduced from 21
+                      color: Colors.black54,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            // Favorite button
+            IconButton(
+              icon: Icon(
+                isFavorite ? Icons.favorite : Icons.favorite_border,
+                color: const Color(0xFF063B04),
+                size: 15, // Reduced from 30
+              ),
+              onPressed: onFavoritePressed,
+              constraints: const BoxConstraints(minWidth: 24, minHeight: 24), // Reduced from 48/48
+              padding: EdgeInsets.zero,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
