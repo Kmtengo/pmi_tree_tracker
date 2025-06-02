@@ -7,20 +7,87 @@ import '../widgets/pmi_button_styles.dart';
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
-  @override
-  Widget build(BuildContext context) {
+  @override  Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F9F7),
+      backgroundColor: const Color(0xFFE9F0E9), // 25% heavier mint-cream background
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Status cards section
+              // PMI-Kenya Initiative Section
+              Container(
+                margin: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 16.0),
+                padding: const EdgeInsets.all(20.0),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF9F9F9), // Light off-white background
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Left column with text (2/3 width)
+                    Expanded(
+                      flex: 2,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'PMI-Kenya',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF333333),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          RichText(
+                            text: const TextSpan(
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF222222),
+                                height: 1.1,
+                              ),
+                              children: [
+                                TextSpan(text: 'Tree Planting\n'),
+                                TextSpan(
+                                  text: 'Initiative',
+                                  style: TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),                    // Right column with Kenya map image (1/3 width)
+                    const Expanded(
+                      flex: 1,
+                      child: Image(
+                        image: AssetImage('assets/images/kenya_map.png'),
+                        color: Color(0xFF7E57C2), // Muted purple color
+                        height: 120, // Increased from 80 for better visibility
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+                // Status cards section
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
                 child: SizedBox(
-                  height: 180, // Increased to 180px
+                  height: 190, // Increased to 190px as requested
                   child: ListView(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -71,14 +138,11 @@ class DashboardScreen extends StatelessWidget {
                         },
                         onCardTap: () {
                           // Show pending verifications
-                        },
-                      ),
+                        },                      ),
                     ],
                   ),
                 ),
-              ),
-
-              // Activity feed header
+              ),              // Activity feed header
               Padding(
                 padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 12.0),
                 child: SectionHeader(
@@ -91,7 +155,7 @@ class DashboardScreen extends StatelessWidget {
 
               // Activity feed items
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                padding: const EdgeInsets.fromLTRB(16.0, 4.0, 16.0, 16.0),
                 child: Column(
                   children: [
                     ActivityItem(
@@ -157,21 +221,20 @@ class StatusCard extends StatelessWidget {
     required this.onButtonPressed,
     required this.onCardTap,
   });
-
-  @override
-  Widget build(BuildContext context) {
-    // Recalculate card width to ensure all 3 cards fit on screen
+  @override  Widget build(BuildContext context) {
+    // Recalculate card width to ensure all 3 cards fit on screen with better spacing
     final screenWidth = MediaQuery.of(context).size.width;
-    final horizontalPadding = 32.0; // 12.0 on each side
-    final cardSpacing = 24.0; // 9.0 between each of the 3 cards (2 spaces)
+    final horizontalPadding = 32.0; // 16.0 on each side
+    final cardSpacing = 30.0; // 15.0 between each of the 3 cards (2 spaces)
     final availableWidth = screenWidth - horizontalPadding - cardSpacing;
-    final cardWidth = availableWidth / 3; // Divide available space equally among 3 cards
+    // Adding 2px to each card's width as requested
+    final cardWidth = (availableWidth / 3) + 2; 
     
     return GestureDetector(
       onTap: onCardTap,
       child: Container(
         width: cardWidth,
-        height: 180,
+        height: 190, // Increased to 190px as requested
         decoration: BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(12),
