@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:io';
+import 'dart:ui';
+import 'dart:math' as math;
 import '../view_models/tree_view_model.dart';
 import '../services/photo_service.dart';
 import '../widgets/photo_viewer_widgets.dart';
@@ -226,8 +228,10 @@ class _AddTreeScreenState extends State<AddTreeScreen> {
             color: Colors.white,
             fontWeight: FontWeight.w600,
             fontSize: 20,
+            fontFamily: 'Roboto',
           ),
         ),
+        centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
@@ -240,17 +244,15 @@ class _AddTreeScreenState extends State<AddTreeScreen> {
             child: Form(
               key: _formKey,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Tree Species Field
                   _buildLabel('Tree Species*'),
                   const SizedBox(height: 8),
-                  TextFormField(
+                  _buildInputField(
                     controller: _speciesController,
-                    decoration: _buildInputDecoration(
-                      'e.g., Oak, Mango, Pine',
-                      Icons.eco,
-                    ),
+                    hintText: 'e.g., Oak, Mango, Pine',
+                    prefixIcon: const Icon(Icons.eco, color: Color(0xFF4CAF50)),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter tree species';
@@ -263,40 +265,23 @@ class _AddTreeScreenState extends State<AddTreeScreen> {
                   // Location Field
                   _buildLabel('Location*'),
                   const SizedBox(height: 8),
-                  TextFormField(
+                  _buildInputField(
                     controller: _locationController,
-                    decoration: InputDecoration(
-                      hintText: 'e.g. Nairobi National Park',
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
-                      ),
-                      prefixIcon: const Icon(Icons.location_on, color: Color(0xFF4CAF50)),
-                      suffixIcon: _isGettingLocation
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: Padding(
-                                padding: EdgeInsets.all(12.0),
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              ),
-                            )
-                          : IconButton(
-                              icon: const Icon(Icons.my_location, color: Color(0xFF4CAF50)),
-                              onPressed: _getCurrentLocation,
+                    hintText: 'e.g. Nairobi National Park',
+                    prefixIcon: const Icon(Icons.location_on, color: Color(0xFF4CAF50)),
+                    suffixIcon: _isGettingLocation
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: Padding(
+                              padding: EdgeInsets.all(12.0),
+                              child: CircularProgressIndicator(strokeWidth: 2),
                             ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                    ),
+                          )
+                        : IconButton(
+                            icon: const Icon(Icons.my_location, color: Color(0xFF4CAF50)),
+                            onPressed: _getCurrentLocation,
+                          ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter location';
@@ -309,13 +294,11 @@ class _AddTreeScreenState extends State<AddTreeScreen> {
                   // Number of Trees Field
                   _buildLabel('Number of Trees*'),
                   const SizedBox(height: 8),
-                  TextFormField(
+                  _buildInputField(
                     controller: _quantityController,
+                    hintText: 'e.g., 10',
                     keyboardType: TextInputType.number,
-                    decoration: _buildInputDecoration(
-                      'e.g., 10',
-                      Icons.format_list_numbered,
-                    ),
+                    prefixIcon: const Icon(Icons.format_list_numbered, color: Color(0xFF4CAF50)),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter number of trees';
@@ -329,147 +312,59 @@ class _AddTreeScreenState extends State<AddTreeScreen> {
                   const SizedBox(height: 20),
 
                   // Planting Team Field
-                  _buildLabel('Planting Team*'),
+                  _buildLabel('Planting Team'),
                   const SizedBox(height: 8),
-                  DropdownButtonFormField<String>(
-                    value: _teamName,
-                    decoration: _buildInputDecoration(
-                      'Select Team',
-                      Icons.group,
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0xFFE0E0E0)),
                     ),
-                    items: _teamNames.map((String team) {
-                      return DropdownMenuItem<String>(
-                        value: team,
-                        child: Text(team),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _teamName = newValue;
-                      });
-                    },
+                    child: DropdownButtonFormField<String>(
+                      value: _teamName,
+                      decoration: const InputDecoration(
+                        prefixIcon: Icon(Icons.group, color: Color(0xFF4CAF50)),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                      ),
+                      items: _teamNames.map((String team) {
+                        return DropdownMenuItem<String>(
+                          value: team,
+                          child: Text(team),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          _teamName = newValue;
+                        });
+                      },
+                    ),
                   ),
                   const SizedBox(height: 20),
 
                   // Photo Upload Section
                   _buildLabel('Tree Photo*'),
-                  const SizedBox(height: 4),
-                  const Text(
-                    'Please take a clear photo of the tree planting activity',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Color(0xFF757575),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: const Color(0xFFBDBDBD),
-                        style: BorderStyle.solid,
-                        width: 1,
-                      ),
-                      color: const Color(0xFFF5F5F5),
-                    ),
-                    child: _imagePath == null
-                        ? InkWell(
-                            onTap: _takePhoto,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 32),
-                              child: Column(
-                                children: [
-                                  Icon(
-                                    Icons.photo_camera,
-                                    size: 48,
-                                    color: Theme.of(context).colorScheme.secondary,
-                                  ),
-                                  const SizedBox(height: 12),
-                                  const Text(
-                                    'Upload Photo',
-                                    style: TextStyle(
-                                      color: Color(0xFF757575),
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      TextButton.icon(
-                                        icon: const Icon(Icons.camera_alt),
-                                        label: const Text('Camera'),
-                                        onPressed: _takePhoto,
-                                        style: TextButton.styleFrom(
-                                          foregroundColor: const Color(0xFF38761D),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 16),
-                                      TextButton.icon(
-                                        icon: const Icon(Icons.photo_library),
-                                        label: const Text('Gallery'),
-                                        onPressed: _chooseFromGallery,
-                                        style: TextButton.styleFrom(
-                                          foregroundColor: const Color(0xFF38761D),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          )
-                        : Stack(
-                            children: [
-                              GestureDetector(
-                                onTap: _viewImage,
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: Image.file(
-                                    File(_imagePath!),
-                                    height: 200,
-                                    width: double.infinity,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                              Positioned(
-                                right: 8,
-                                bottom: 8,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.black.withOpacity(0.6),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: IconButton(
-                                    icon: const Icon(Icons.zoom_in, color: Colors.white),
-                                    onPressed: _viewImage,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                  ),
+                  const SizedBox(height: 8),
+                  _buildPhotoUploadArea(),
                   const SizedBox(height: 20),
 
                   // Description Field
                   _buildLabel('Description (Optional)'),
                   const SizedBox(height: 8),
-                  TextFormField(
+                  _buildInputField(
                     controller: _notesController,
-                    maxLines: 3,
-                    decoration: _buildInputDecoration(
-                      'Add any additional notes here...',
-                      Icons.edit,
-                    ),
+                    hintText: 'Add any additional notes here...',
+                    maxLines: 4,
+                    prefixIcon: const Icon(Icons.edit, color: Color(0xFF4CAF50)),
                   ),
                   const SizedBox(height: 32),
 
                   // Submit Button
                   SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: ElevatedButton(
+                    height: 56,
+                    child: ElevatedButton.icon(
+                      icon: const Icon(Icons.check),
+                      label: const Text('Submit Record'),
                       onPressed: treeViewModel.isLoading ? null : _addTree,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF38761D),
@@ -477,24 +372,12 @@ class _AddTreeScreenState extends State<AddTreeScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        elevation: 0,
+                        textStyle: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'Roboto',
+                        ),
                       ),
-                      child: treeViewModel.isLoading
-                          ? const SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : const Text(
-                              'Submit Record',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
                     ),
                   ),
                 ],
@@ -513,29 +396,191 @@ class _AddTreeScreenState extends State<AddTreeScreen> {
         fontSize: 14,
         fontWeight: FontWeight.w500,
         color: Color(0xFF424242),
+        fontFamily: 'Roboto',
       ),
     );
   }
 
-  InputDecoration _buildInputDecoration(String hint, IconData icon) {
-    return InputDecoration(
-      hintText: hint,
-      filled: true,
-      fillColor: Colors.white,
-      border: OutlineInputBorder(
+  Widget _buildInputField({
+    required TextEditingController controller,
+    required String hintText,
+    Widget? prefixIcon,
+    Widget? suffixIcon,
+    TextInputType? keyboardType,
+    int maxLines = 1,
+    String? Function(String?)? validator,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
         borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+        border: Border.all(color: const Color(0xFFE0E0E0)),
       ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+      child: TextFormField(
+        controller: controller,
+        keyboardType: keyboardType,
+        maxLines: maxLines,
+        decoration: InputDecoration(
+          hintText: hintText,
+          hintStyle: const TextStyle(
+            color: Color(0xFF757575),
+            fontSize: 14,
+          ),
+          prefixIcon: prefixIcon,
+          suffixIcon: suffixIcon,
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        ),
+        validator: validator,
       ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Color(0xFF38761D)),
-      ),
-      prefixIcon: Icon(icon, color: const Color(0xFF4CAF50)),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     );
+  }
+
+  Widget _buildPhotoUploadArea() {
+    return GestureDetector(
+      onTap: _imagePath == null ? _showPhotoOptions : _viewImage,
+      child: CustomPaint(
+        painter: DashedBorderPainter(
+          color: const Color(0xFFBDBDBD),
+          strokeWidth: 1,
+          gap: 5.0,
+        ),
+        child: Container(
+          height: 200,
+          decoration: BoxDecoration(
+            color: const Color(0xFFF5F5F5),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: _imagePath == null
+              ? Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.photo_camera,
+                      size: 48,
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Upload Photo',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Color(0xFF757575),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                )
+              : Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.file(
+                        File(_imagePath!),
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
+                      ),
+                    ),
+                    Positioned(
+                      right: 8,
+                      bottom: 8,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.6),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: IconButton(
+                          icon: const Icon(Icons.zoom_in, color: Colors.white),
+                          onPressed: _viewImage,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+        ),
+      ),
+    );
+  }
+
+  void _showPhotoOptions() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt, color: Color(0xFF4CAF50)),
+              title: const Text('Take Photo'),
+              onTap: () {
+                Navigator.pop(context);
+                _takePhoto();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library, color: Color(0xFF4CAF50)),
+              title: const Text('Choose from Gallery'),
+              onTap: () {
+                Navigator.pop(context);
+                _chooseFromGallery();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class DashedBorderPainter extends CustomPainter {
+  final Color color;
+  final double strokeWidth;
+  final double gap;
+
+  DashedBorderPainter({
+    this.color = Colors.black,
+    this.strokeWidth = 1.0,
+    this.gap = 5.0,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()
+      ..color = color
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke;
+
+    final Path path = Path()
+      ..addRRect(RRect.fromRectAndRadius(
+        Rect.fromLTWH(0, 0, size.width, size.height),
+        const Radius.circular(8),
+      ));
+
+    final Path dashedPath = Path();
+    final double dashWidth = 5.0;
+
+    for (PathMetric metric in path.computeMetrics()) {
+      double distance = 0.0;
+      while (distance < metric.length) {
+        dashedPath.addPath(
+          metric.extractPath(distance, distance + dashWidth),
+          Offset.zero,
+        );
+        distance += dashWidth + gap;
+      }
+    }
+
+    canvas.drawPath(dashedPath, paint);
+  }
+
+  @override
+  bool shouldRepaint(DashedBorderPainter oldDelegate) {
+    return oldDelegate.color != color ||
+        oldDelegate.strokeWidth != strokeWidth ||
+        oldDelegate.gap != gap;
   }
 }
