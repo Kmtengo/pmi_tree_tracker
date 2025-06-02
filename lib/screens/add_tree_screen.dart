@@ -30,9 +30,9 @@ class _AddTreeScreenState extends State<AddTreeScreen> {
   final List<String> _teamNames = [
     'PMI Nairobi Team',
     'PMI Coastal Region',
-    'PMI Western Kenya',
-    'PMI Central Division',
-    'PMI Youth Initiative',
+    'PMI Western Region',
+    'PMI Central Region',
+    'PMI Youth Team',
   ];
 
   @override
