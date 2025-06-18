@@ -47,25 +47,13 @@ class DashboardScreen extends StatelessWidget {
                               color: Color(0xFF333333),
                             ),
                           ),
-                          const SizedBox(height: 8),
-                          RichText(
-                            text: const TextSpan(
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.w800,
-                                color: Color(0xFF222222),
-                                height: 1.1,
-                              ),
-                              children: [
-                                TextSpan(text: 'Tree Planting\n'),
-                                TextSpan(
-                                  text: 'Initiative',
-                                  style: TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ],
+                          const SizedBox(height: 8),                          const Text(
+                            'Tree Planting Initiative',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF222222),
+                              height: 1.1,
                             ),
                           ),
                         ],
@@ -91,14 +79,13 @@ class DashboardScreen extends StatelessWidget {
                   child: ListView(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    children: [
-                      StatusCard(
-                        backgroundColor: const Color(0xFF345A33),
+                    children: [                      StatusCard(
+                        backgroundColor: const Color(0xFF7E57C2), // Changed to purple
                         iconData: Icons.local_florist,
-                        title: 'Trees planted (total)',
-                        subtitle: 'Grows paradise\nA plantita y planter',
+                        title: 'Total Trees Planted',
                         buttonText: 'Add new planting',
-                        buttonColor: Colors.lightGreen[100]!,
+                        buttonColor: const Color(0xFFE1BEE7), // Pale purple
+                        buttonTextColor: Colors.grey, // White text
                         onButtonPressed: () {
                           // Navigate to planting screen
                         },
@@ -106,15 +93,14 @@ class DashboardScreen extends StatelessWidget {
                           // Show tree details
                         },
                       ),
-                      const SizedBox(width: 15),
-                      StatusCard(
-                        backgroundColor: const Color(0xFF0DD7E6),
-                        iconData: Icons.article,
-                        title: 'Active projects',
-                        subtitle: 'Stocking where\nAn earthy realm of activities',
-                        buttonText: 'Upload growth update',
-                        buttonColor: Colors.lightBlue[100]!,
-                        buttonTextStyle: const TextStyle(
+                        const SizedBox(width: 15),                        StatusCard(
+                          backgroundColor: const Color(0xFF0DD7E6),
+                          iconData: Icons.article,
+                          title: 'Active projects',
+                          buttonText: 'Upload growth update',
+                          buttonColor: Colors.lightBlue[100]!,
+                          buttonTextColor: Colors.grey, // White text
+                          buttonTextStyle: const TextStyle(
                           fontSize: 8.5, // Reduced by 0.5px from 9.0
                           fontWeight: FontWeight.w600,
                         ),
@@ -125,20 +111,20 @@ class DashboardScreen extends StatelessWidget {
                           // Show projects
                         },
                       ),
-                      const SizedBox(width: 15),
-                      StatusCard(
+                      const SizedBox(width: 15),                      StatusCard(
                         backgroundColor: const Color(0xFFF58804),
                         iconData: Icons.verified_user,
                         title: 'Pending verifications',
-                        subtitle: 'Seeds planted\nA promise fulfilled',
                         buttonText: 'View updates',
                         buttonColor: const Color(0xFFFDCFBC), // Light peach
+                        buttonTextColor: Colors.grey, // White text
                         onButtonPressed: () {
                           // Navigate to verification screen
                         },
                         onCardTap: () {
                           // Show pending verifications
-                        },                      ),
+                        },
+                      ),
                     ],
                   ),
                 ),
@@ -159,8 +145,8 @@ class DashboardScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     ActivityItem(
-                      title: 'You logged 12 trees in Kisumu',
-                      subtitle: '5 requests in time 00:12',
+                      title: 'You logged 12 trees in Naivasha',
+                      subtitle: 'Collins Ayodo - Hells Gate Sanctuary Project',
                       iconData: Icons.forest,
                       isFavorite: false,
                       onFavoritePressed: () {
@@ -169,9 +155,9 @@ class DashboardScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 9), // Reduced from 18
                     ActivityItem(
-                      title: 'Upload voveh atees poow approval',
-                      subtitle: 'Mating art A4',
-                      iconData: Icons.forest,
+                      title: 'Uploaded growth update',
+                      subtitle: 'Dan Alwende - Karura Forest Project',
+                      iconData: Icons.upload,
                       isFavorite: false,
                       onFavoritePressed: () {
                         // Toggle favorite status
@@ -179,9 +165,9 @@ class DashboardScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 9), // Reduced from 18
                     ActivityItem(
-                      title: '3 photos pending approval',
-                      subtitle: 'Manes and puds /12274',
-                      iconData: Icons.forest,
+                      title: '3 photos uploaded',
+                      subtitle: 'Moses Mtengo - Mangrove Restoration Project',
+                      iconData: Icons.photo_camera,
                       isFavorite: false,
                       onFavoritePressed: () {
                         // Toggle favorite status
@@ -202,9 +188,10 @@ class StatusCard extends StatelessWidget {
   final Color backgroundColor;
   final IconData iconData;
   final String title;
-  final String subtitle;
+  final String? subtitle; // Made optional
   final String buttonText;
   final Color buttonColor;
+  final Color? buttonTextColor; // Added button text color
   final TextStyle? buttonTextStyle;
   final VoidCallback onButtonPressed;
   final VoidCallback onCardTap;
@@ -214,9 +201,10 @@ class StatusCard extends StatelessWidget {
     required this.backgroundColor,
     required this.iconData,
     required this.title,
-    required this.subtitle,
+    this.subtitle, // Made optional
     required this.buttonText,
     required this.buttonColor,
+    this.buttonTextColor, // Added button text color
     this.buttonTextStyle,
     required this.onButtonPressed,
     required this.onCardTap,
@@ -231,27 +219,35 @@ class StatusCard extends StatelessWidget {
     final cardWidth = (availableWidth / 3) + 2; 
     
     return GestureDetector(
-      onTap: onCardTap,
-      child: Container(
+      onTap: onCardTap,      child: Container(
         width: cardWidth,
         height: 190, // Increased to 190px as requested
         decoration: BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(12),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Top section with icon and title
+        ),        child: Stack(
+          children: [
+            // Background plant icon - centered
+            Center(
+              child: Icon(
+                Icons.eco, // Plant/leaf icon
+                size: 80,
+                color: Colors.white.withOpacity(0.4),
+              ),
+            ),
+            // Card content
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [// Top section with icon and title
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withOpacity(0.4),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
@@ -260,11 +256,7 @@ class StatusCard extends StatelessWidget {
                       size: 20,
                     ),
                   ),
-                  const Icon(
-                    Icons.chevron_left,
-                    color: Colors.white,
-                    size: 20,
-                  ),
+                  // Removed the chevron_left icon
                 ],
               ),
               
@@ -280,18 +272,18 @@ class StatusCard extends StatelessWidget {
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-              ),
-              
-              // Subtitle
-              Text(
-                subtitle,
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.7),
-                  fontSize: 11,
+              ),              
+              // Subtitle (only show if provided)
+              if (subtitle != null)
+                Text(
+                  subtitle!,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.4),
+                    fontSize: 11,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
               
               const Spacer(),
               
@@ -299,10 +291,9 @@ class StatusCard extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: onButtonPressed,
-                  style: ElevatedButton.styleFrom(
+                  onPressed: onButtonPressed,                  style: ElevatedButton.styleFrom(
                     backgroundColor: buttonColor,
-                    foregroundColor: backgroundColor,
+                    foregroundColor: buttonTextColor ?? backgroundColor,
                     padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 3),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -312,12 +303,13 @@ class StatusCard extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                     elevation: 0,
-                  ),
-                  child: Text(buttonText),
+                  ),                  child: Text(buttonText),
                 ),
               ),
-            ],
-          ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -333,12 +325,11 @@ class SectionHeader extends StatelessWidget {
     required this.title,
     required this.onMorePressed,
   });
-
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF2E7D32), // Green background (AppBar color)
         borderRadius: BorderRadius.circular(12),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -348,20 +339,12 @@ class SectionHeader extends StatelessWidget {
           Text(
             title,
             style: const TextStyle(
-              color: Color(0xFF2D6D4B),
+              color: Colors.white, // White text
               fontSize: 18,
               fontWeight: FontWeight.w600,
             ),
           ),
-          IconButton(
-            icon: const Icon(
-              Icons.keyboard_arrow_right,
-              color: Color(0xFF2D6D4B),
-            ),
-            onPressed: onMorePressed,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-          ),
+          // Removed the IconButton with keyboard_arrow_right
         ],
       ),
     );

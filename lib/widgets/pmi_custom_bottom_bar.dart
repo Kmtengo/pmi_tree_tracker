@@ -15,10 +15,14 @@ class PMICustomBottomAppBar extends StatelessWidget {
   Widget build(BuildContext context) {    return Container(
       height: 60, // Increased to fix overflow (was 56)
       decoration: BoxDecoration(
-        color: PMIColors.mintCream,
+        color: PMIColors.mintCream.withValues(
+          alpha: 255, // Full opacity
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(
+              alpha: 0.1, // Reduced opacity for softer shadow
+            ),
             blurRadius: 4,
             offset: const Offset(0, -1),
           ),

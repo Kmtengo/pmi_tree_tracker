@@ -68,13 +68,20 @@ class _HomePageState extends State<HomePage> {
     const AzureMapScreen(),
     const ReportsScreen(),
   ];
+  // AppBar titles for each screen
+  final List<String> _appBarTitles = [
+    'Dashboard',
+    'Log Trees',
+    'Map',
+    'Reports',
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const PMIAppDrawer(),      appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primary,
-        title: const Text('PMI-Kenya', style: TextStyle(color: Colors.white)),
+        title: Text(_appBarTitles[_currentIndex], style: const TextStyle(color: Colors.white)),
         // Drawer icon is automatically added when a drawer is specified
         actions: [
           SyncStatusButton(

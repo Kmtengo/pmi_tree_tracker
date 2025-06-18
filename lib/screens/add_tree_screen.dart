@@ -3,12 +3,10 @@ import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:io';
 import 'dart:ui';
-import 'dart:math' as math;
 import '../view_models/tree_view_model.dart';
 import '../services/photo_service.dart';
 import '../widgets/photo_viewer_widgets.dart';
 import '../screens/custom_camera_screen.dart';
-import '../utils/pmi_colors.dart';
 
 class AddTreeScreen extends StatefulWidget {
   const AddTreeScreen({super.key});
@@ -23,25 +21,11 @@ class _AddTreeScreenState extends State<AddTreeScreen> {
   final _locationController = TextEditingController();
   final _quantityController = TextEditingController();
   final _notesController = TextEditingController();
+  final _teamController = TextEditingController();
   final PhotoService _photoService = PhotoService();
   
-  String? _imagePath;
-  bool _isGettingLocation = false;
+  String? _imagePath;  bool _isGettingLocation = false;
   Position? _currentPosition;
-  String? _teamName;
-  
-  final List<String> _teamNames = [
-    'Green Warriors',
-    'Eco Builders',
-    'Forest Friends',
-    'Tree Troopers',
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _teamName = _teamNames[0];
-  }
 
   @override
   void dispose() {
@@ -49,6 +33,7 @@ class _AddTreeScreenState extends State<AddTreeScreen> {
     _locationController.dispose();
     _quantityController.dispose();
     _notesController.dispose();
+    _teamController.dispose();
     super.dispose();
   }
 
@@ -170,14 +155,13 @@ class _AddTreeScreenState extends State<AddTreeScreen> {
     final treeViewModel = Provider.of<TreeViewModel>(currentContext, listen: false);
     final int quantity = int.parse(_quantityController.text);
     
-    try {
-      final success = await treeViewModel.addTree(
+    try {      final success = await treeViewModel.addTree(
         species: _speciesController.text,
         location: _locationController.text,
         quantity: quantity,
         photoUrl: _imagePath,
         notes: _notesController.text,
-        teamName: _teamName,
+        teamName: _teamController.text,
         latitude: _currentPosition?.latitude,
         longitude: _currentPosition?.longitude,
       );
@@ -202,41 +186,22 @@ class _AddTreeScreenState extends State<AddTreeScreen> {
       );
     }
   }
-
   void _resetForm() {
     _formKey.currentState?.reset();
     _speciesController.clear();
     _locationController.clear();
     _quantityController.clear();
     _notesController.clear();
+    _teamController.clear();
     setState(() {
       _imagePath = null;
       _currentPosition = null;
     });
   }
-  
-  @override
+    @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF38761D),
-        elevation: 0,
-        title: const Text(
-          'Add Planting Record',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-            fontSize: 20,
-            fontFamily: 'Roboto',
-          ),
-        ),
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ),
       body: Consumer<TreeViewModel>(
         builder: (context, treeViewModel, child) {
           return SingleChildScrollView(
@@ -309,36 +274,19 @@ class _AddTreeScreenState extends State<AddTreeScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 20),
-
-                  // Planting Team Field
+                  const SizedBox(height: 20),                  // Planting Team Field
                   _buildLabel('Planting Team'),
                   const SizedBox(height: 8),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: const Color(0xFFE0E0E0)),
-                    ),
-                    child: DropdownButtonFormField<String>(
-                      value: _teamName,
-                      decoration: const InputDecoration(
-                        prefixIcon: Icon(Icons.group, color: Color(0xFF4CAF50)),
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 16),
-                      ),
-                      items: _teamNames.map((String team) {
-                        return DropdownMenuItem<String>(
-                          value: team,
-                          child: Text(team),
-                        );
-                      }).toList(),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          _teamName = newValue;
-                        });
-                      },
-                    ),
+                  _buildInputField(
+                    controller: _teamController,
+                    hintText: 'Enter team name',
+                    prefixIcon: const Icon(Icons.group, color: Color(0xFF4CAF50)),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter team name';
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 20),
 

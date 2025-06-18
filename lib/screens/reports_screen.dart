@@ -15,11 +15,10 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
   late TabController _tabController;
   DateTime _startDate = DateTime(DateTime.now().year, 1, 1); // Jan 1 of current year
   DateTime _endDate = DateTime.now();
-  
-  @override
+    @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     
     // Load trees when reports screen is opened
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -160,19 +159,19 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
                     ),
                   ],
                 ),
-              ),
-              TabBar(
+              ),              TabBar(
                 controller: _tabController,
                 tabs: const [
                   Tab(text: 'Summary'),
                   Tab(text: 'By Species'),
                   Tab(text: 'By Team'),
+                  Tab(text: 'Carbon Credits'),
                 ],
                 labelColor: Theme.of(context).colorScheme.primary,
                 indicatorColor: Theme.of(context).colorScheme.primary,
                 unselectedLabelColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-              ),
-              Expanded(
+                isScrollable: true, // Enable scrolling for 4 tabs
+              ),              Expanded(
                 child: TabBarView(
                   controller: _tabController,
                   children: [
@@ -184,6 +183,9 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
                     
                     // By Team Tab
                     _buildTeamTab(context, filteredTrees),
+                    
+                    // Carbon Credits Tab
+                    _buildCarbonCreditsTab(context, filteredTrees),
                   ],
                 ),
               ),
@@ -662,7 +664,314 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
               ),
             ),
           ),
+        ],      ),
+    );
+  }
+  
+  Widget _buildCarbonCreditsTab(BuildContext context, List<Tree> trees) {
+    // Carbon credit calculations
+    final totalTrees = trees.fold(0, (sum, tree) => sum + tree.quantity);
+    
+    // Average CO2 absorption rates per tree (kg/year) by species
+    const carbonAbsorptionRates = {
+      'Acacia': 21.8,
+      'Eucalyptus': 35.3,
+      'Pine': 13.0,
+      'Mango': 28.5,
+      'Baobab': 32.7,
+      'Oak': 22.0,
+      'Cypress': 17.5,
+      'Bamboo': 12.0,
+      'Cedar': 25.4,
+      'Mahogany': 30.2,
+    };
+    
+    // Calculate CO2 absorbed by species
+    final speciesCarbonMap = <String, double>{};
+    double totalCarbonAbsorbed = 0;
+    
+    for (var tree in trees) {
+      final species = tree.species;
+      final rate = carbonAbsorptionRates[species] ?? 22.0; // Default rate if species not found
+      final yearsGrown = DateTime.now().difference(tree.plantingDate).inDays / 365;
+      final carbonPerTree = rate * yearsGrown.clamp(0.1, double.infinity); // Minimum 0.1 year
+      final totalCarbon = carbonPerTree * tree.quantity;
+      
+      speciesCarbonMap[species] = (speciesCarbonMap[species] ?? 0) + totalCarbon;
+      totalCarbonAbsorbed += totalCarbon;
+    }
+    
+    // Convert to carbon credits (1 credit = 1 metric ton CO2)
+    final totalCarbonCredits = totalCarbonAbsorbed / 1000;
+    final estimatedValue = totalCarbonCredits * 15; // $15 per credit (average market price)
+    
+    // Sort species by carbon contribution
+    final sortedSpecies = speciesCarbonMap.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header cards with key metrics
+          Row(
+            children: [
+              _buildCarbonStatCard(
+                context,
+                title: 'CO₂ Absorbed',
+                value: '${totalCarbonAbsorbed.toStringAsFixed(1)} kg',
+                icon: Icons.eco,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: 16),
+              _buildCarbonStatCard(
+                context,
+                title: 'Carbon Credits',
+                value: totalCarbonCredits.toStringAsFixed(2),
+                icon: Icons.account_balance_wallet,
+                color: Theme.of(context).colorScheme.secondary,
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              _buildCarbonStatCard(
+                context,
+                title: 'Estimated Value',
+                value: '\$${estimatedValue.toStringAsFixed(0)}',
+                icon: Icons.monetization_on,
+                color: const Color(0xFF00AEEF), // PMI Blue
+              ),
+              const SizedBox(width: 16),
+              _buildCarbonStatCard(
+                context,
+                title: 'Average/Tree',
+                value: '${(totalCarbonAbsorbed / totalTrees).toStringAsFixed(1)} kg',
+                icon: Icons.trending_up,
+                color: const Color(0xFF662D91), // Purple
+              ),
+            ],
+          ),
+          
+          const SizedBox(height: 24),
+          
+          // Carbon impact explanation
+          Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'Carbon Credit Impact',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Carbon credits represent the amount of CO₂ your trees have absorbed from the atmosphere. Each credit equals 1 metric ton (1,000 kg) of CO₂ removed.',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'This environmental impact contributes to climate change mitigation and can generate revenue through carbon credit markets.',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          
+          const SizedBox(height: 24),
+          
+          // Species contribution breakdown
+          const Text(
+            'CO₂ Absorption by Species',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          
+          Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: ListView.separated(
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              itemCount: sortedSpecies.length,
+              separatorBuilder: (context, index) => const Divider(height: 1),
+              itemBuilder: (context, index) {
+                final species = sortedSpecies[index];
+                final percentage = (species.value / totalCarbonAbsorbed * 100).toStringAsFixed(1);
+                final credits = (species.value / 1000).toStringAsFixed(3);
+                
+                return ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                    child: Icon(
+                      Icons.eco,
+                      color: Theme.of(context).colorScheme.primary,
+                      size: 20,
+                    ),
+                  ),
+                  title: Text(
+                    species.key,
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('${species.value.toStringAsFixed(1)} kg CO₂'),
+                      const SizedBox(height: 4),
+                      LinearProgressIndicator(
+                        value: species.value / totalCarbonAbsorbed,
+                        backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  trailing: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        '$credits credits',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        '$percentage%',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+          
+          const SizedBox(height: 24),
+          
+          // Monthly carbon absorption trend
+          const Text(
+            'Monthly Carbon Absorption Trend',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          
+          Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  const Text(
+                    'Carbon absorption increases over time as trees grow larger and more efficient at CO₂ sequestration.',
+                    style: TextStyle(fontSize: 14),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),                  SizedBox(
+                    height: 150,
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.trending_up,
+                            size: 48,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Growing Impact',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
+      ),
+    );
+  }
+  
+  Widget _buildCarbonStatCard(
+    BuildContext context, {
+    required String title,
+    required String value,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Expanded(
+      child: Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: color),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              Text(
+                title,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

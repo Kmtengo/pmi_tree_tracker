@@ -84,7 +84,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 FadeTransition(
                   opacity: _animation,
                   child: const Text(
-                    'PMI Tree Tracker',
+                    'PMI-Kenya Tree Tracker',
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
